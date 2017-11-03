@@ -52,9 +52,9 @@ def make_network(pixels_num, hidden_units):
 
   # lr=1e-4
   lr=1e-3
-  # decay_rate=0.99
-  # opt = tf.train.RMSPropOptimizer(lr, decay=decay_rate).minimize(loss)
-  opt = tf.train.AdamOptimizer(lr).minimize(loss)
+  decay_rate=0.99
+  opt = tf.train.RMSPropOptimizer(lr, decay=decay_rate).minimize(loss)
+  # opt = tf.train.AdamOptimizer(lr).minimize(loss)
 
   tf.summary.histogram("hidden_out", hidden)
   tf.summary.histogram("logits_out", logits)
@@ -67,12 +67,13 @@ def make_network(pixels_num, hidden_units):
 
 pixels_num = 6400
 hidden_units = 200
-batch_size = 10
+batch_size = 10 #50
 
 tf.reset_default_graph()
 pix_ph, action_ph, reward_ph, out_sym, opt_sym, merged_sym = make_network(pixels_num, hidden_units)
 
 resume = False
+# resume = True
 render = False
 
 sess = tf.Session()
@@ -115,8 +116,8 @@ while True:
   if done:
     episode_number += 1
     discounted_epr = discount_rewards(ep_ws)
-    # discounted_epr -= np.mean(discounted_epr)
-    # discounted_epr /= np.std(discounted_epr)
+    discounted_epr -= np.mean(discounted_epr)
+    discounted_epr /= np.std(discounted_epr)
     # print(type(discounted_epr), discounted_epr.shape)
     batch_ws += discounted_epr.tolist()
 
