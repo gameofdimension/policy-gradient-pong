@@ -7,6 +7,7 @@ import gym
 import tensorflow as tf
 import time
 import os
+import sys
 
 def prepro(I):
   """ prepro 210x160x3 uint8 frame into 6400 (80x80) 1D float vector """
@@ -78,8 +79,10 @@ sess = tf.Session()
 saver = tf.train.Saver()
 # writer = tf.summary.FileWriter('./log/train', sess.graph)
 
+weight_path = sys.argv[1]
 if resume:
-  saver.restore(sess, tf.train.latest_checkpoint('./log/checkpoints'))
+  # saver.restore(sess, tf.train.latest_checkpoint('./log/checkpoints'))
+  saver.restore(sess, tf.train.latest_checkpoint(weight_path))
 else:
   sess.run(tf.global_variables_initializer())
 
