@@ -1,5 +1,9 @@
 # policy-gradient-pong
 
+### Reinforcement learning approach to win Atari game pong. 
+### tenforflow implementation of [Andrej Karpathy's original numpy version](http://karpathy.github.io/2016/05/31/rl/)
+![](pong-animation.gif)
+
 ## dependencies
 * tensorflow
 * numpy
