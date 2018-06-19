@@ -107,7 +107,9 @@ while True:
   tf_probs = sess.run(out_sym, feed_dict={pix_ph:x.reshape((-1,x.size))})
   y = 1 if np.random.uniform() < tf_probs[0,0] else 0
   action = 2 + y
-  observation, reward, done, info = env.step(action)
+  del observation
+  del cur_x
+  observation, reward, done, _ = env.step(action)
 
   xs.append(x)
   ys.append(y)
@@ -124,6 +126,7 @@ while True:
     reward_mean = 0.99*reward_mean+(1-0.99)*(sum(ep_ws))
     rs_sum = tf.Summary(value=[tf.Summary.Value(tag="running_reward", simple_value=reward_mean)])
     writer.add_summary(rs_sum, global_step=episode_number)
+    del ep_ws
     ep_ws = []
     if reward_mean > 5.0:
         break
@@ -134,11 +137,18 @@ while True:
         eys = np.vstack(ys)
         ews = np.vstack(batch_ws)
         frame_size = len(xs)
+
+        tf_opt, tf_summary = sess.run([opt_sym, merged_sym], feed_dict={pix_ph:exs,action_ph:eys,reward_ph:ews})
+        del xs
+        del ys
+        del discounted_epr
+        del batch_ws
         xs = []
         ys = []
         batch_ws = []
-
-        tf_opt, tf_summary = sess.run([opt_sym, merged_sym], feed_dict={pix_ph:exs,action_ph:eys,reward_ph:ews})
+        del exs
+        del eys
+        del ews
         saver.save(sess, "./log/checkpoints/pg_{}.ckpt".format(step))
         writer.add_summary(tf_summary, step)
         print("datetime: {}, episode: {}, update step: {}, frame size: {}, reward: {}".\
