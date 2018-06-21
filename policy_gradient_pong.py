@@ -137,18 +137,32 @@ while True:
         eys = np.vstack(ys)
         ews = np.vstack(batch_ws)
         frame_size = len(xs)
-
-        tf_opt, tf_summary = sess.run([opt_sym, merged_sym], feed_dict={pix_ph:exs,action_ph:eys,reward_ph:ews})
         del xs
         del ys
         del discounted_epr
         del batch_ws
+
+        stride = 20000
+        pos = 0
+        while True:
+            end = frame_size if pos+stride>=frame_size else pos+stride
+            batch_x = exs[pos:end]
+            batch_y = eys[pos:end]
+            batch_w = ews[pos:end]
+            # tf_opt, tf_summary = sess.run([opt_sym, merged_sym], feed_dict={pix_ph:exs,action_ph:eys,reward_ph:ews})
+            tf_opt, tf_summary = sess.run([opt_sym, merged_sym], feed_dict={pix_ph:batch_x,action_ph:batch_y,reward_ph:batch_w})
+            pos = end
+            if pos >= frame_size:
+                break
         xs = []
         ys = []
         batch_ws = []
         del exs
         del eys
         del ews
+        del batch_x
+        del batch_y
+        del batch_w
         saver.save(sess, "./log/checkpoints/pg_{}.ckpt".format(step))
         writer.add_summary(tf_summary, step)
         print("datetime: {}, episode: {}, update step: {}, frame size: {}, reward: {}".\
